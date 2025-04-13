@@ -1,7 +1,7 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const cors = require('cors'); // Импортируем cors
+const cors = require('cors');
 const {
   saveMessage,
   getLast100Messages,
@@ -15,9 +15,9 @@ const app = express();
 
 // Настройка CORS для Express
 app.use(cors({
-  origin: 'http://localhost:3000', // Разрешить запросы с этого домена
-  methods: ['GET', 'POST'], // Разрешенные HTTP-методы
-  credentials: true // Разрешить передачу куки и заголовков авторизации
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST'],
+  credentials: true
 }));
 
 const server = http.createServer(app);
@@ -25,75 +25,77 @@ const server = http.createServer(app);
 // Настройка CORS для Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000', // Разрешить запросы с этого домена
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST']
   }
 });
 
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
+  console.log('Пользователь подключился:', socket.id);
 
-  // Проверить имя пользователя в комнате
+  // Проверка имени пользователя в комнате
   socket.on('check_username', async ({ username, room }, callback) => {
     try {
       const isDuplicate = await checkUsernameInRoom(username, room);
       callback(isDuplicate);
     } catch (err) {
-      console.error(err);
+      console.error('Ошибка при проверке имени пользователя:', err);
       callback(false);
     }
   });
 
-  // Присоединиться к комнате
+  // Присоединение к комнате
   socket.on('join_room', async ({ username, room }) => {
     try {
-      await addUserToRoom(username, room); // Добавить пользователя в комнату
+      await addUserToRoom(username, room); // Добавляем пользователя в комнату
       socket.join(room);
-      const messages = await getLast100Messages(room); // Получить последние 100 сообщений
+      const messages = await getLast100Messages(room); // Загружаем последние 100 сообщений
       socket.emit('last_100_messages', messages);
+      console.log(`${username} присоединился к комнате ${room}`);
     } catch (err) {
-      console.error(err);
+      console.error('Ошибка при присоединении к комнате:', err);
     }
   });
 
-  // Отправить сообщение
+  // Отправка сообщения
   socket.on('send_message', async (data) => {
     try {
-      await saveMessage(data.message, data.username, data.room); // Сохранить сообщение в БД
-      io.to(data.room).emit('receive_message', data);
+      await saveMessage(data.message, data.username, data.room); // Сохраняем сообщение
+      io.to(data.room).emit('receive_message', data); // Отправляем всем в комнате
     } catch (err) {
-      console.error(err);
+      console.error('Ошибка при отправке сообщения:', err);
     }
   });
 
-  // Создать комнату
+  // Создание новой комнаты
   socket.on('create_room', async (roomName, callback) => {
     try {
-      await createRoom(roomName); // Создать комнату в БД
-      callback({ success: true, message: 'Room created successfully' });
+      await createRoom(roomName); // Создаём комнату в базе
+      callback({ success: true, message: 'Комната успешно создана' });
+      console.log(`Создана новая комната: ${roomName}`);
     } catch (err) {
-      console.error(err);
-      callback({ success: false, message: err.message || 'Failed to create room' });
+      console.error('Ошибка при создании комнаты:', err);
+      callback({ success: false, message: err.message || 'Не удалось создать комнату' });
     }
   });
 
-  // Получить список комнат
+  // Получение списка всех комнат
   socket.on('get_rooms', async (callback) => {
     try {
-      const rooms = await getRooms(); // Получить список комнат из БД
+      const rooms = await getRooms(); // Получаем комнаты из базы
       callback(rooms);
     } catch (err) {
-      console.error(err);
+      console.error('Ошибка при получении списка комнат:', err);
       callback([]);
     }
   });
 
   // Отключение пользователя
   socket.on('disconnect', () => {
-    console.log('User disconnected');
+    console.log('Пользователь отключился:', socket.id);
   });
 });
 
 server.listen(4000, () => {
-  console.log('Server is running on port 4000');
+  console.log('Сервер запущен на порту 4000');
 });

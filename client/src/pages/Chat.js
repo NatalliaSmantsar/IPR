@@ -34,7 +34,7 @@ const Chat = ({ socket, username, room }) => {
 
   return (
     <main className="chat-container">
-      <h1>Chat Room: {room}</h1>
+      <h1>Комната: {room}</h1>
       <section className="messages">
         {messages.map((msg, i) => (
           <div key={i} className={`message ${msg.username === username ? 'sent' : 'received'}`}>
@@ -49,9 +49,9 @@ const Chat = ({ socket, username, room }) => {
         <input
           value={messageInput}
           onChange={(e) => setMessageInput(e.target.value)}
-          placeholder="Type a message..."
+          placeholder="Введите сообщение..."
         />
-        <button onClick={sendMessage}>Send</button>
+        <button onClick={sendMessage}>Отправить</button>
       </section>
     </main>
   );

@@ -4,22 +4,26 @@ import { useNavigate } from 'react-router-dom';
 const Home = ({ username, setUsername, room, setRoom, socket, rooms, createRoom }) => {
   const navigate = useNavigate();
   const [newRoom, setNewRoom] = useState('');
+  const [usernameError, setUsernameError] = useState('');
 
   const joinRoom = () => {
+    if (username.length > 20) {
+      setUsernameError('Имя не должно превышать 20 символов');
+      return;
+    }
     if (room !== '' && username !== '') {
       socket.emit('check_username', { username, room }, async (isDuplicate) => {
-        let newUsername = username; // Объявляем newUsername здесь
+        let newUsername = username;
         if (isDuplicate) {
           let counter = 1;
           while (isDuplicate) {
             newUsername = `${username}#${counter}`;
             const isDup = await new Promise((resolve) => {
-              // Используем IIFE для создания локальной области видимости
               ((currentUsername) => {
                 socket.emit('check_username', { username: currentUsername, room }, (isDup) => {
                   resolve(isDup);
                 });
-              })(newUsername); // Передаем текущее значение newUsername
+              })(newUsername);
             });
             isDuplicate = isDup;
             counter++;
@@ -34,7 +38,7 @@ const Home = ({ username, setUsername, room, setRoom, socket, rooms, createRoom 
 
   const handleCreateRoom = () => {
     if (newRoom.trim() === '') {
-      alert('Room name cannot be empty');
+      alert('Название комнаты не может быть пустым');
       return;
     }
     createRoom(newRoom);
@@ -43,26 +47,34 @@ const Home = ({ username, setUsername, room, setRoom, socket, rooms, createRoom 
 
   return (
     <main className="container">
-      <h1>DevRooms</h1>
+      <h1>FreeRooms</h1>
       <form onSubmit={(e) => e.preventDefault()}>
         <div className="form-group">
-          <label htmlFor="username">Username:</label>
+          <label htmlFor="username">Имя пользователя:</label>
           <input
             id="username"
             type="text"
-            placeholder="Enter your name..."
+            placeholder="Введите имя..."
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value.length <= 20) {
+                setUsernameError('');
+                setUsername(e.target.value);
+              } else {
+                setUsernameError('Имя не должно превышать 20 символов');
+              }
+            }}
           />
+          {usernameError && <p style={{ color: 'red' }}>{usernameError}</p>}
         </div>
         <div className="form-group">
-          <label htmlFor="room">Select Room:</label>
+          <label htmlFor="room">Выберите комнату:</label>
           <select
             id="room"
             value={room}
             onChange={(e) => setRoom(e.target.value)}
           >
-            <option value="">-- Select Room --</option>
+            <option value="">-- Выберите комнату --</option>
             {rooms.map((r) => (
               <option key={r} value={r}>
                 {r}
@@ -71,18 +83,18 @@ const Home = ({ username, setUsername, room, setRoom, socket, rooms, createRoom 
           </select>
         </div>
         <button type="button" onClick={joinRoom}>
-          Join Room
+          Войти в комнату
         </button>
       </form>
       <div className="create-room">
         <input
           type="text"
-          placeholder="Create a new room..."
+          placeholder="Создать новую комнату..."
           value={newRoom}
           onChange={(e) => setNewRoom(e.target.value)}
         />
         <button type="button" onClick={handleCreateRoom}>
-          Create Room
+          Создать комнату
         </button>
       </div>
     </main>
