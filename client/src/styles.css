@@ -1,7 +1,7 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Nunito', sans-serif;
   background-color: #3b2f2f;
   color: #fff;
   overflow-x: hidden;
@@ -39,18 +39,29 @@ body {
   margin: 0;
   font-size: 36px;
   color: white;
-  letter-spacing: 2px;
+  letter-spacing: 6px; 
   transition: color 0.3s ease;
-}
-
-.title:hover {
-  color: #f0f0f0;
+  font-family: 'Comfortaa', cursive;
+  font-weight: 700;
+  text-shadow: 
+    0.5px 0 0 currentColor,
+    0 0.5px 0 currentColor,
+    -0.5px 0 0 currentColor,
+    0 -0.5px 0 currentColor;
+  line-height: 1;
 }
 
 .subtitle {
-  margin: 0;
-  font-size: 12px;
-  color: black;
+  margin: 2px 0 0; 
+  font-size: 14px;
+  color: #222;
+  font-family: 'Comfortaa', cursive;
+  font-weight: 700;
+  letter-spacing: 2px; 
+  text-transform: uppercase;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  opacity: 0.9;
+  line-height: 1;
 }
 
 .footer {
@@ -87,6 +98,7 @@ body {
   width: 100%;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
+  font-family: 'Nunito', sans-serif;
 }
 
 .form-box:hover {
@@ -100,7 +112,8 @@ body {
 .form-group label {
   display: block;
   margin-bottom: 5px;
-  font-weight: bold;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
 }
 
 .form-group input,
@@ -112,6 +125,14 @@ select {
   border: 1px solid #ddd;
   border-radius: 4px;
   transition: border-color 0.3s ease;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 400;
+}
+
+.form-group input::placeholder,
+select option:not(:checked) {
+  font-weight: 400;
+  font-family: 'Nunito', sans-serif;
 }
 
 .form-group input:focus,
@@ -121,6 +142,13 @@ select:focus {
 
 .create-room {
   margin-top: 15px;
+}
+
+.create-room label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
 }
 
 .create-room-row {
@@ -134,6 +162,13 @@ select:focus {
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  font-weight: 400;
+  font-family: 'Nunito', sans-serif;
+}
+
+.create-room input::placeholder {
+  font-weight: 400;
+  font-family: 'Nunito', sans-serif;
 }
 
 .create-room button {
@@ -143,6 +178,9 @@ select:focus {
   border: none;
   cursor: pointer;
   border-radius: 4px;
+  font-family: 'Comfortaa', cursive;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .start-btn {
@@ -151,11 +189,12 @@ select:focus {
   padding: 12px;
   background-color: #643333;
   color: white;
-  font-weight: bold;
+  font-weight: 700;
   border: none;
   cursor: pointer;
   border-radius: 4px;
   transition: background-color 0.3s ease;
+  font-family: 'Comfortaa', cursive;
 }
 
 .start-btn:hover {
@@ -172,6 +211,8 @@ select:focus {
   text-align: center;
   font-size: 24px;
   margin-bottom: 15px;
+  font-family: 'Comfortaa', cursive;
+  font-weight: 700;
 }
 
 .messages {
@@ -185,6 +226,7 @@ select:focus {
   border-radius: 4px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   height: calc(100vh - 300px);
+  font-family: 'Nunito', sans-serif;
 }
 
 .message {
@@ -197,6 +239,7 @@ select:focus {
   white-space: pre-wrap;
   font-size: 14px;
   line-height: 1.3;
+  font-weight: 400;
 }
 
 .sent {
@@ -216,6 +259,8 @@ select:focus {
   color: gray;
   margin-top: 5px;
   text-align: right;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 400;
 }
 
 .input-area {
@@ -228,6 +273,14 @@ select:focus {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 400;
+  min-width: 0;
+}
+
+.input-area input::placeholder {
+  font-weight: 400;
+  font-family: 'Nunito', sans-serif;
 }
 
 .input-area button {
@@ -237,6 +290,9 @@ select:focus {
   border: none;
   cursor: pointer;
   border-radius: 4px;
+  font-family: 'Comfortaa', cursive;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .input-area button:hover {
@@ -246,6 +302,8 @@ select:focus {
 .error {
   color: red;
   font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 400;
 }
 
 @media (max-width: 768px) {
@@ -262,6 +320,9 @@ select:focus {
   .messages {
     height: calc(100vh - 320px);
   }
+  .input-area button {
+    padding: 10px 15px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -277,5 +338,20 @@ select:focus {
   }
   .messages {
     height: calc(100vh - 290px);
+  }
+  .input-area {
+    gap: 8px;
+  }
+  .input-area button {
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+  .create-room-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .create-room button {
+    width: 100%;
+    padding: 10px;
   }
 }
