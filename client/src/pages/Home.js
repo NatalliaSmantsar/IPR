@@ -5,6 +5,7 @@ const Home = ({ username, setUsername, room, setRoom, socket, rooms, createRoom 
   const navigate = useNavigate();
   const [newRoom, setNewRoom] = useState('');
   const [usernameError, setUsernameError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const joinRoom = () => {
     if (username.length > 20) {
@@ -45,6 +46,10 @@ const Home = ({ username, setUsername, room, setRoom, socket, rooms, createRoom 
     setNewRoom('');
   };
 
+  const filteredRooms = rooms.filter(room => 
+    room.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <main className="container">
       <h1>FreeRooms</h1>
@@ -69,13 +74,19 @@ const Home = ({ username, setUsername, room, setRoom, socket, rooms, createRoom 
         </div>
         <div className="form-group">
           <label htmlFor="room">Выберите комнату:</label>
+          <input
+            type="text"
+            placeholder="Поиск комнаты..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
           <select
             id="room"
             value={room}
             onChange={(e) => setRoom(e.target.value)}
           >
             <option value="">-- Выберите комнату --</option>
-            {rooms.map((r) => (
+            {filteredRooms.map((r) => (
               <option key={r} value={r}>
                 {r}
               </option>
