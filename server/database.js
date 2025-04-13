@@ -12,6 +12,24 @@ db.serialize(() => {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Таблица для комнат
+  db.run(`
+    CREATE TABLE IF NOT EXISTS rooms (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE
+    )
+  `);
+
+  // Таблица для пользователей
+  db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT,
+      room TEXT,
+      UNIQUE(username, room)
+    )
+  `);
 });
 
 // Сохранить сообщение
@@ -36,4 +54,68 @@ function getLast100Messages(room) {
   });
 }
 
-module.exports = { saveMessage, getLast100Messages };
+// Создать комнату
+function createRoom(roomName) {
+  return new Promise((resolve, reject) => {
+    // Проверить, существует ли комната с таким же названием (без учета регистра)
+    db.get(
+      `SELECT name FROM rooms WHERE LOWER(name) = LOWER(?)`,
+      [roomName],
+      (err, row) => {
+        if (err) return reject(err);
+        if (row) return reject(new Error('Room already exists')); // Комната уже существует
+        // Если комната уникальна, добавить её
+        db.run(
+          `INSERT INTO rooms (name) VALUES (?)`,
+          [roomName],
+          function (err) {
+            if (err) reject(err);
+            else resolve(this.lastID);
+          }
+        );
+      }
+    );
+  });
+}
+
+// Получить список комнат
+function getRooms() {
+  const query = `SELECT name FROM rooms`;
+  return new Promise((resolve, reject) => {
+    db.all(query, [], (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows.map(row => row.name));
+    });
+  });
+}
+
+// Добавить пользователя в комнату
+function addUserToRoom(username, room) {
+  const query = `INSERT INTO users (username, room) VALUES (?, ?)`;
+  return new Promise((resolve, reject) => {
+    db.run(query, [username, room], function (err) {
+      if (err) reject(err);
+      else resolve(this.lastID);
+    });
+  });
+}
+
+// Проверить, существует ли пользователь в комнате
+function checkUsernameInRoom(username, room) {
+  const query = `SELECT username FROM users WHERE username LIKE ? AND room = ?`;
+  return new Promise((resolve, reject) => {
+    db.get(query, [`${username}%`, room], (err, row) => {
+      if (err) reject(err);
+      else resolve(!!row);
+    });
+  });
+}
+
+module.exports = {
+  saveMessage,
+  getLast100Messages,
+  createRoom,
+  getRooms,
+  addUserToRoom,
+  checkUsernameInRoom,
+};

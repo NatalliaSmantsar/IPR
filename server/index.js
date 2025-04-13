@@ -1,89 +1,99 @@
-require('dotenv').config();
 const express = require('express');
 const http = require('http');
-const cors = require('cors');
 const { Server } = require('socket.io');
-const { saveMessage, getLast100Messages } = require('./database');
+const cors = require('cors'); // Импортируем cors
+const {
+  saveMessage,
+  getLast100Messages,
+  createRoom,
+  getRooms,
+  addUserToRoom,
+  checkUsernameInRoom,
+} = require('./database');
 
 const app = express();
-app.use(cors());
+
+// Настройка CORS для Express
+app.use(cors({
+  origin: 'http://localhost:3000', // Разрешить запросы с этого домена
+  methods: ['GET', 'POST'], // Разрешенные HTTP-методы
+  credentials: true // Разрешить передачу куки и заголовков авторизации
+}));
 
 const server = http.createServer(app);
 
+// Настройка CORS для Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-  },
+    origin: 'http://localhost:3000', // Разрешить запросы с этого домена
+    methods: ['GET', 'POST']
+  }
 });
 
-const CHAT_BOT = 'ChatBot';
-let chatRoom = '';
-let allUsers = [];
-
 io.on('connection', (socket) => {
-  console.log(`User connected ${socket.id}`);
+  console.log('User connected:', socket.id);
 
-  // Присоединение пользователя к комнате
-  socket.on('join_room', async (data) => {
-    const { username, room } = data;
-    socket.join(room);
-
-    chatRoom = room;
-    allUsers.push({ id: socket.id, username, room });
-    chatRoomUsers = allUsers.filter((user) => user.room === room);
-
-    // Приветственное сообщение
-    let __createdtime__ = Date.now();
-    socket.emit('receive_message', {
-      message: `Welcome ${username}`,
-      username: CHAT_BOT,
-      __createdtime__,
-    });
-
-    // Отправляем список пользователей
-    socket.to(room).emit('chatroom_users', chatRoomUsers);
-    socket.emit('chatroom_users', chatRoomUsers);
-
-    // Получаем последние 100 сообщений
-    const last100Messages = await getLast100Messages(room);
-    socket.emit('last_100_messages', last100Messages);
+  // Проверить имя пользователя в комнате
+  socket.on('check_username', async ({ username, room }, callback) => {
+    try {
+      const isDuplicate = await checkUsernameInRoom(username, room);
+      callback(isDuplicate);
+    } catch (err) {
+      console.error(err);
+      callback(false);
+    }
   });
 
-  // Отправка сообщения
+  // Присоединиться к комнате
+  socket.on('join_room', async ({ username, room }) => {
+    try {
+      await addUserToRoom(username, room); // Добавить пользователя в комнату
+      socket.join(room);
+      const messages = await getLast100Messages(room); // Получить последние 100 сообщений
+      socket.emit('last_100_messages', messages);
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  // Отправить сообщение
   socket.on('send_message', async (data) => {
-    const { message, username, room, __createdtime__ } = data;
-    io.in(room).emit('receive_message', data);
-    await saveMessage(message, username, room);
+    try {
+      await saveMessage(data.message, data.username, data.room); // Сохранить сообщение в БД
+      io.to(data.room).emit('receive_message', data);
+    } catch (err) {
+      console.error(err);
+    }
   });
 
-  // Выход из комнаты
-  socket.on('leave_room', (data) => {
-    const { username, room } = data;
-    socket.leave(room);
-    allUsers = allUsers.filter((user) => user.id !== socket.id);
-    socket.to(room).emit('chatroom_users', allUsers);
-    socket.to(room).emit('receive_message', {
-      username: CHAT_BOT,
-      message: `${username} has left the chat`,
-      __createdtime__: Date.now(),
-    });
-    console.log(`${username} has left the chat`);
+  // Создать комнату
+  socket.on('create_room', async (roomName, callback) => {
+    try {
+      await createRoom(roomName); // Создать комнату в БД
+      callback({ success: true, message: 'Room created successfully' });
+    } catch (err) {
+      console.error(err);
+      callback({ success: false, message: err.message || 'Failed to create room' });
+    }
+  });
+
+  // Получить список комнат
+  socket.on('get_rooms', async (callback) => {
+    try {
+      const rooms = await getRooms(); // Получить список комнат из БД
+      callback(rooms);
+    } catch (err) {
+      console.error(err);
+      callback([]);
+    }
   });
 
   // Отключение пользователя
   socket.on('disconnect', () => {
     console.log('User disconnected');
-    const user = allUsers.find((user) => user.id === socket.id);
-    if (user) {
-      allUsers = allUsers.filter((user) => user.id !== socket.id);
-      socket.to(chatRoom).emit('chatroom_users', allUsers);
-      socket.to(chatRoom). emit('receive_message', {
-        username: CHAT_BOT,
-        message: `${user.username} has disconnected`,
-      });
-    }
   });
 });
 
-server.listen(4000, () => console.log('Server is running on port 4000'));
+server.listen(4000, () => {
+  console.log('Server is running on port 4000');
+});

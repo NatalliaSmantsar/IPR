@@ -1,95 +1,82 @@
-/* Общие стили */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-  }
-  
-  .container, .chat-container {
-    max-width: 600px;
-    margin: 50px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  h1 {
-    text-align: center;
-    color: #333;
-  }
-  
-  /* Стили для формы */
-  form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  label {
-    margin-bottom: 5px;
-    font-weight: bold;
-  }
-  
-  input, select, button {
-    margin-bottom: 15px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  button {
-    background-color: #28a745;
-    color: white;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #218838;
-  }
-  
-  /* Стили для чата */
-  .messages {
-    height: 400px;
-    overflow-y: scroll;
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin-bottom: 15px;
-  }
-  
-  .message {
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 4px;
-  }
-  
-  .sent {
-    background-color: #d1ecf1;
-    text-align: right;
-  }
-  
-  .received {
-    background-color: #f8d7da;
-  }
-  
-  .input-area {
-    display: flex;
-  }
-  
-  .input-area input {
-    flex: 1;
-    margin-right: 10px;
-  }
-  
-  /* Адаптивность */
-  @media (max-width: 600px) {
-    .container, .chat-container {
-      margin: 20px;
-      padding: 10px;
-    }
-  
-    .messages {
-      height: 300px;
-    }
-  }
-  
+.App {
+  text-align: center;
+  background-color: purple; /* Фиолетовый фон */
+  min-height: 100vh; /* Чтобы фон покрывал всю высоту страницы */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white; /* Белый текст для контраста */
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white; /* Белый фон для контейнера */
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  color: black; /* Черный текст для контраста */
+}
+
+.chat-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.messages {
+  height: 400px;
+  overflow-y: scroll;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #fff;
+}
+
+.message {
+  margin-bottom: 10px;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.sent {
+  background-color: #d1e7dd;
+  text-align: right;
+}
+
+.received {
+  background-color: #f8d7da;
+  text-align: left;
+}
+
+.username {
+  font-weight: bold;
+}
+
+.time {
+  font-size: 0.8em;
+  color: #666;
+  margin-left: 10px;
+}
+
+.input-area {
+  display: flex;
+  gap: 10px;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 5px;
+}
+
+.create-room {
+  margin-top: 20px;
+}
+
+.create-room input {
+  padding: 5px;
+}

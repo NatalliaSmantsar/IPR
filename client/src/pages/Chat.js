@@ -26,7 +26,7 @@ const Chat = ({ socket, username, room }) => {
 
   const sendMessage = () => {
     if (messageInput.trim() !== '') {
-      const __createdtime__ = Date.now();
+      const __createdtime__ = new Date().toLocaleTimeString();
       socket.emit('send_message', { username, room, message: messageInput, __createdtime__ });
       setMessageInput('');
     }
@@ -40,6 +40,7 @@ const Chat = ({ socket, username, room }) => {
           <div key={i} className={`message ${msg.username === username ? 'sent' : 'received'}`}>
             <span className="username">{msg.username}: </span>
             <span className="text">{msg.message}</span>
+            <span className="time">{msg.__createdtime__}</span>
           </div>
         ))}
         <div ref={messagesEndRef} />
