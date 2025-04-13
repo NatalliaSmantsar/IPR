@@ -60,7 +60,7 @@ io.on('connection', (socket) => {
         message: data.message,
         username: data.username,
         room: data.room,
-        created_at: new Date().toISOString(), 
+        created_at: new Date().toISOString(),
       };
       io.to(data.room).emit('receive_message', messageData);
     } catch (err) {

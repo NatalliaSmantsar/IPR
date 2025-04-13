@@ -48,8 +48,10 @@ const Chat = ({ socket, username, room }) => {
 
             return (
               <div key={i} className={`message ${msg.username === username ? 'sent' : 'received'}`}>
-                <span className="username">{msg.username}: </span>
-                <span className="text">{msg.message}</span>
+                <div className="message-content">
+                  <span className="username">{msg.username}: </span>
+                  <span className="text">{msg.message}</span>
+                </div>
                 <span className="time">{formattedDate}</span>
               </div>
             );

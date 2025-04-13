@@ -136,6 +136,14 @@ select {
   align-self: flex-start;
 }
 
+.message .time {
+  display: block;
+  font-size: 12px;
+  color: #a3a3a3;
+  margin-top: 5px;
+  text-align: right;
+}
+
 .input-area {
   display: flex;
   gap: 10px;
