@@ -67,6 +67,7 @@ const Home = ({ username, setUsername, room, setRoom, socket, rooms, createRoom 
                   setUsernameError('Имя не должно превышать 20 символов');
                 }
               }}
+              className={usernameError ? 'error-input' : ''}
             />
             {usernameError && <p className="error">{usernameError}</p>}
           </div>
