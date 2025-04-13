@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
 
 const Home = ({ username, setUsername, room, setRoom, socket, rooms, createRoom }) => {
   const navigate = useNavigate();
@@ -20,11 +21,7 @@ const Home = ({ username, setUsername, room, setRoom, socket, rooms, createRoom 
           while (isDuplicate) {
             newUsername = `${username}#${counter}`;
             const isDup = await new Promise((resolve) => {
-              ((currentUsername) => {
-                socket.emit('check_username', { username: currentUsername, room }, (isDup) => {
-                  resolve(isDup);
-                });
-              })(newUsername);
+              socket.emit('check_username', { username: newUsername, room }, resolve);
             });
             isDuplicate = isDup;
             counter++;
@@ -46,69 +43,72 @@ const Home = ({ username, setUsername, room, setRoom, socket, rooms, createRoom 
     setNewRoom('');
   };
 
-  const filteredRooms = rooms.filter(room => 
-    room.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredRooms = rooms.filter(r =>
+    r.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <main className="container">
-      <h1>FreeRooms</h1>
-      <form onSubmit={(e) => e.preventDefault()}>
-        <div className="form-group">
-          <label htmlFor="username">Имя пользователя:</label>
-          <input
-            id="username"
-            type="text"
-            placeholder="Введите имя..."
-            value={username}
-            onChange={(e) => {
-              if (e.target.value.length <= 20) {
-                setUsernameError('');
-                setUsername(e.target.value);
-              } else {
-                setUsernameError('Имя не должно превышать 20 символов');
-              }
-            }}
-          />
-          {usernameError && <p style={{ color: 'red' }}>{usernameError}</p>}
-        </div>
-        <div className="form-group">
-          <label htmlFor="room">Выберите комнату:</label>
-          <input
-            type="text"
-            placeholder="Поиск комнаты..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <select
-            id="room"
-            value={room}
-            onChange={(e) => setRoom(e.target.value)}
-          >
-            <option value="">-- Выберите комнату --</option>
-            {filteredRooms.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button type="button" onClick={joinRoom}>
-          Войти в комнату
-        </button>
-      </form>
-      <div className="create-room">
-        <input
-          type="text"
-          placeholder="Создать новую комнату..."
-          value={newRoom}
-          onChange={(e) => setNewRoom(e.target.value)}
-        />
-        <button type="button" onClick={handleCreateRoom}>
-          Создать комнату
-        </button>
-      </div>
-    </main>
+    <>
+      <Header />
+      <main className="container">
+        <form onSubmit={(e) => e.preventDefault()} className="form-box">
+          <div className="form-group">
+            <label htmlFor="username">Nickname:</label>
+            <input
+              id="username"
+              type="text"
+              placeholder="Введите имя..."
+              value={username}
+              onChange={(e) => {
+                if (e.target.value.length <= 20) {
+                  setUsernameError('');
+                  setUsername(e.target.value);
+                } else {
+                  setUsernameError('Имя не должно превышать 20 символов');
+                }
+              }}
+            />
+            {usernameError && <p className="error">{usernameError}</p>}
+          </div>
+          <div className="form-group">
+            <label htmlFor="room">Выбор комнаты:</label>
+            <input
+              type="text"
+              placeholder="Поиск комнаты..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <select
+              id="room"
+              value={room}
+              onChange={(e) => setRoom(e.target.value)}
+            >
+              <option value="">-Список комнат-</option>
+              {filteredRooms.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+          </div>
+          <div className="create-room">
+            <label>Создать новую комнату</label>
+            <div className="create-room-row">
+              <input
+                type="text"
+                placeholder=""
+                value={newRoom}
+                onChange={(e) => setNewRoom(e.target.value)}
+              />
+              <button type="button" onClick={handleCreateRoom}>
+                Создать
+              </button>
+            </div>
+          </div>
+          <button className="start-btn" type="button" onClick={joinRoom}>
+            Начать общение
+          </button>
+        </form>
+      </main>
+    </>
   );
 };
 

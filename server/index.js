@@ -13,7 +13,6 @@ const {
 
 const app = express();
 
-// Настройка CORS для Express
 app.use(cors({
   origin: 'http://localhost:3000',
   methods: ['GET', 'POST'],
@@ -22,7 +21,6 @@ app.use(cors({
 
 const server = http.createServer(app);
 
-// Настройка CORS для Socket.IO
 const io = new Server(server, {
   cors: {
     origin: 'http://localhost:3000',
@@ -33,7 +31,6 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log('Пользователь подключился:', socket.id);
 
-  // Проверка имени пользователя в комнате
   socket.on('check_username', async ({ username, room }, callback) => {
     try {
       const isDuplicate = await checkUsernameInRoom(username, room);
@@ -44,12 +41,11 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Присоединение к комнате
   socket.on('join_room', async ({ username, room }) => {
     try {
-      await addUserToRoom(username, room); // Добавляем пользователя в комнату
+      await addUserToRoom(username, room);
       socket.join(room);
-      const messages = await getLast100Messages(room); // Загружаем последние 100 сообщений
+      const messages = await getLast100Messages(room);
       socket.emit('last_100_messages', messages);
       console.log(`${username} присоединился к комнате ${room}`);
     } catch (err) {
@@ -57,20 +53,24 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Отправка сообщения
   socket.on('send_message', async (data) => {
     try {
-      await saveMessage(data.message, data.username, data.room); // Сохраняем сообщение
-      io.to(data.room).emit('receive_message', data); // Отправляем всем в комнате
+      const messageId = await saveMessage(data.message, data.username, data.room);
+      const messageData = {
+        message: data.message,
+        username: data.username,
+        room: data.room,
+        created_at: new Date().toISOString(), 
+      };
+      io.to(data.room).emit('receive_message', messageData);
     } catch (err) {
       console.error('Ошибка при отправке сообщения:', err);
     }
   });
 
-  // Создание новой комнаты
   socket.on('create_room', async (roomName, callback) => {
     try {
-      await createRoom(roomName); // Создаём комнату в базе
+      await createRoom(roomName);
       callback({ success: true, message: 'Комната успешно создана' });
       console.log(`Создана новая комната: ${roomName}`);
     } catch (err) {
@@ -79,10 +79,9 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Получение списка всех комнат
   socket.on('get_rooms', async (callback) => {
     try {
-      const rooms = await getRooms(); // Получаем комнаты из базы
+      const rooms = await getRooms();
       callback(rooms);
     } catch (err) {
       console.error('Ошибка при получении списка комнат:', err);
@@ -90,7 +89,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Отключение пользователя
   socket.on('disconnect', () => {
     console.log('Пользователь отключился:', socket.id);
   });

@@ -1,7 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./chat.db');
 
-// Создаем таблицу для сообщений
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS messages (
@@ -13,7 +12,6 @@ db.serialize(() => {
     )
   `);
 
-  // Таблица для комнат
   db.run(`
     CREATE TABLE IF NOT EXISTS rooms (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,7 +19,6 @@ db.serialize(() => {
     )
   `);
 
-  // Таблица для пользователей
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +29,6 @@ db.serialize(() => {
   `);
 });
 
-// Сохранить сообщение
 function saveMessage(message, username, room) {
   const query = `INSERT INTO messages (message, username, room) VALUES (?, ?, ?)`;
   return new Promise((resolve, reject) => {
@@ -43,28 +39,24 @@ function saveMessage(message, username, room) {
   });
 }
 
-// Получить последние 100 сообщений
 function getLast100Messages(room) {
   const query = `SELECT * FROM messages WHERE room = ? ORDER BY created_at DESC LIMIT 100`;
   return new Promise((resolve, reject) => {
     db.all(query, [room], (err, rows) => {
       if (err) reject(err);
-      else resolve(rows.reverse()); // Сортируем по времени
+      else resolve(rows.reverse()); 
     });
   });
 }
 
-// Создать комнату
 function createRoom(roomName) {
   return new Promise((resolve, reject) => {
-    // Проверить, существует ли комната с таким же названием (без учета регистра)
     db.get(
       `SELECT name FROM rooms WHERE LOWER(name) = LOWER(?)`,
       [roomName],
       (err, row) => {
         if (err) return reject(err);
-        if (row) return reject(new Error('Room already exists')); // Комната уже существует
-        // Если комната уникальна, добавить её
+        if (row) return reject(new Error('Room already exists')); 
         db.run(
           `INSERT INTO rooms (name) VALUES (?)`,
           [roomName],
@@ -78,7 +70,6 @@ function createRoom(roomName) {
   });
 }
 
-// Получить список комнат
 function getRooms() {
   const query = `SELECT name FROM rooms`;
   return new Promise((resolve, reject) => {
@@ -89,7 +80,6 @@ function getRooms() {
   });
 }
 
-// Добавить пользователя в комнату
 function addUserToRoom(username, room) {
   const query = `INSERT INTO users (username, room) VALUES (?, ?)`;
   return new Promise((resolve, reject) => {
@@ -100,7 +90,6 @@ function addUserToRoom(username, room) {
   });
 }
 
-// Проверить, существует ли пользователь в комнате
 function checkUsernameInRoom(username, room) {
   const query = `SELECT username FROM users WHERE username LIKE ? AND room = ?`;
   return new Promise((resolve, reject) => {
